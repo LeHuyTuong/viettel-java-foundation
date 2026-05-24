@@ -2,6 +2,8 @@ package com.learning.w1.aop;
 
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 // BÀI TẬP - Ngày 3 (Tue 27/5)
@@ -23,6 +25,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class LoggingAspect {
 
+    private static final Logger log = LoggerFactory.getLogger(LoggingAspect.class);
+
     // @Around bao quanh toàn bộ method — bạn kiểm soát cả trước lẫn sau
     // Pointcut expression: "execution(* com.learning.demo.*.*(..))"
     //   *          → return type bất kỳ
@@ -30,11 +34,22 @@ public class LoggingAspect {
     //   *(..)      → method bất kỳ, argument bất kỳ
     @Around("execution(* com.learning.demo.*.*(..))")
     public Object logExecutionTime(ProceedingJoinPoint joinPoint) throws Throwable {
-        // TODO: lấy tên method: joinPoint.getSignature().getName()
-        // TODO: đo thời gian trước và sau joinPoint.proceed()
-        // TODO: in ra log
+        //lấy tên method: joinPoint.getSignature().getName()
+        String methodName = joinPoint.getSignature().getName();
+
+        // đo thời gian trước và sau joinPoint.proceed()
+         long startTime = System.currentTimeMillis();
+
+        // in ra log
         // QUAN TRỌNG: phải return kết quả của joinPoint.proceed()
         //             nếu không response sẽ là null
-        return joinPoint.proceed();
+        // vì spring gọi proxy , rồi logExecutionTime gọi method thật qua process(
+    
+        try {
+            return joinPoint.proceed();
+        } finally {
+            long duration = System.currentTimeMillis() - startTime;
+            log.info("[AOP] {}() executed in {}ms", methodName, duration);
+        }
     }
 }
