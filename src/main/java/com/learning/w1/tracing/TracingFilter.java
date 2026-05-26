@@ -6,6 +6,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 // BÀI TẬP NÂNG CAO - Ngày 5 (Thu 29/5)
 // Kết hợp Filter (ngày 1) + TraceContext (ngày 4-5)
@@ -19,8 +22,10 @@ import java.io.IOException;
 //
 // Đây chính là cơ chế cốt lõi của distributed tracing.
 // Bước tiếp theo (W2+) sẽ lưu context này vào ThreadLocal để các layer khác đọc được.
-// @Component  ← bỏ comment này khi bạn đã implement TraceContext xong
+@Component 
 public class TracingFilter extends OncePerRequestFilter {
+
+    private static final Logger log = LoggerFactory.getLogger(TracingFilter.class);
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -29,10 +34,15 @@ public class TracingFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
 
         // TODO: đọc header "traceparent" từ request
-        // TODO: parse hoặc tạo mới TraceContext
-        // TODO: log trace info
-        // TODO: gắn header vào response
+        String traceparent = request.getHeader("traceparent");
 
+        // TODO: parse hoặc tạo mới TraceContext
+        TraceContext traceContext = TraceContext.fromHeader(traceparent);
+        // TODO: log trace info
+        log.info("[TRACE] traceId={} spanId={} {} {}", traceContext.getTraceId(), traceContext.getSpanId(),
+                request.getMethod(), request.getRequestURI());
+        // TODO: gắn header vào response
+        response.setHeader("traceparent", traceContext.toHeader());
         filterChain.doFilter(request, response);
     }
 }
