@@ -14,6 +14,7 @@ Bộ ghi chú tổng hợp từ quá trình học Tuần 1 (Filter / Interceptor
 | [05-logging-slf4j.md](05-logging-slf4j.md) | Vì sao dùng SLF4J thay vì `System.out.println`. |
 | [06-distributed-tracing.md](06-distributed-tracing.md) | traceId / spanId / W3C traceparent. Day 4-5. |
 | [07-troubleshooting.md](07-troubleshooting.md) | Port conflict, lỗi thường gặp. |
+| [08-mdc-log-correlation.md](08-mdc-log-correlation.md) | MDC + log correlation — gắn traceId vào mọi dòng log tự động. Bước graduation sau W1. |
 
 ## Tóm tắt 1 dòng cho mỗi tầng
 
@@ -39,6 +40,6 @@ Càng vào trong càng "gần code", càng ra ngoài càng "gần HTTP". Chọn 
 | Interceptor | `src/main/java/com/learning/w1/interceptor/LoggingInterceptor.java` | Done |
 | Interceptor config | `src/main/java/com/learning/w1/interceptor/WebMvcConfig.java` | Done |
 | AOP | `src/main/java/com/learning/w1/aop/LoggingAspect.java` | Done |
-| Tracing context | `src/main/java/com/learning/w1/tracing/TraceContext.java` | TODO Day 4 |
-| Tracing filter | `src/main/java/com/learning/w1/tracing/TracingFilter.java` | TODO Day 5 |
+| Tracing context | `src/main/java/com/learning/w1/tracing/TraceContext.java` | Done |
+| Tracing filter | `src/main/java/com/learning/w1/tracing/TracingFilter.java` | Done |
 | Test endpoints | `src/main/java/com/learning/demo/DemoController.java` | Có sẵn |
