@@ -8,6 +8,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 // BÀI TẬP NÂNG CAO - Ngày 5 (Thu 29/5)
@@ -22,27 +24,39 @@ import org.springframework.stereotype.Component;
 //
 // Đây chính là cơ chế cốt lõi của distributed tracing.
 // Bước tiếp theo (W2+) sẽ lưu context này vào ThreadLocal để các layer khác đọc được.
-@Component 
+@Component
+@Order(1) // Chạy trước các filter khác (nếu có)
 public class TracingFilter extends OncePerRequestFilter {
 
     private static final Logger log = LoggerFactory.getLogger(TracingFilter.class);
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
-                                    HttpServletResponse response,
-                                    FilterChain filterChain)
+            HttpServletResponse response,
+            FilterChain filterChain)
             throws ServletException, IOException {
 
-        // TODO: đọc header "traceparent" từ request
+        // đọc header "traceparent" từ request
         String traceparent = request.getHeader("traceparent");
 
-        // TODO: parse hoặc tạo mới TraceContext
+        // parse hoặc tạo mới TraceContext
         TraceContext traceContext = TraceContext.fromHeader(traceparent);
-        // TODO: log trace info
-        log.info("[TRACE] traceId={} spanId={} {} {}", traceContext.getTraceId(), traceContext.getSpanId(),
-                request.getMethod(), request.getRequestURI());
-        // TODO: gắn header vào response
-        response.setHeader("traceparent", traceContext.toHeader());
-        filterChain.doFilter(request, response);
+
+        try {
+            MDC.put("traceId", traceContext.getTraceId());
+            MDC.put("spanId", traceContext.getSpanId());
+
+            // log trace info
+            log.info("[TRACE] traceId={} spanId={} {} {}", traceContext.getTraceId(), traceContext.getSpanId(),
+            request.getMethod(), request.getRequestURI());
+            // gắn header vào response
+            response.setHeader("traceparent", traceContext.toHeader());
+
+            filterChain.doFilter(request, response);
+        } finally {
+            MDC.clear();
+
+        }
+
     }
 }
